@@ -206,6 +206,7 @@ int main() {
     std::vector<std::string> classes {"ROI"};
 
     try {
+        torch::Device device(torch::cuda::is_available() ? torch::kCUDA :torch::kCPU);
         // Load the model 
         std::string model_path = "../yolov8s_train.torchscript";
         // std::string model_path = "../yolov8n_train.torchscript";
@@ -249,7 +250,7 @@ int main() {
             cv::namedWindow("ROI", 0);
             cv::resizeWindow("ROI", 1920, 1200);
             cv::imshow("ROI", roi);
-        
+        }
        
         cv::namedWindow("Original", 0);
         cv::resizeWindow("Original", 1920, 1200);

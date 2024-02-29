@@ -14,7 +14,7 @@ The software is written in C++ and needs Libtorch and OpenCV. In Linux:
 
 ```
 wget https://download.pytorch.org/libtorch/cu118/libtorch-cxx11-abi-shared-with-deps-2.2.1%2Bcu118.zip
-unzip libtorch-cxx11-abi-shared-with-deps-latest.zip
+unzip libtorch-cxx11-abi-shared-with-deps-2.2.1+cu118.zip
 ```
 ```
 wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip

@@ -13,8 +13,8 @@ This repository contains the implementation of a satellite pose estimation softw
 The software is written in C++ and needs Libtorch and OpenCV. In Linux:
 
 ```
-wget https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip
-unzip libtorch-shared-with-deps-latest.zip
+wget https://download.pytorch.org/libtorch/cu118/libtorch-cxx11-abi-shared-with-deps-2.2.1%2Bcu118.zip
+unzip libtorch-cxx11-abi-shared-with-deps-latest.zip
 ```
 ```
 wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip

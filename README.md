@@ -1,4 +1,4 @@
-# On-Board-Pose-Estimation
+# On-Board Pose Estimation
 
 This repository contains the implementation of a satellite pose estimation software. The code is based on the YOLOv8 CPP Inference example found in https://github.com/ultralytics/ultralytics/blob/main/examples/YOLOv8-LibTorch-CPP-Inference
 

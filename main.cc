@@ -202,22 +202,21 @@ torch::Tensor scale_boxes(const std::vector<int>& img1_shape, torch::Tensor& box
 
 
 int main() {
-    // Device
-    torch::Device device(torch::cuda::is_available() ? torch::kCUDA :torch::kCPU);
-
-    // Note that in this example the classes are hard-coded
+    
     std::vector<std::string> classes {"ROI"};
 
     try {
-        // Load the model (e.g. yolov8s.torchscript)
+        // Load the model 
         std::string model_path = "../yolov8s_train.torchscript";
+        // std::string model_path = "../yolov8n_train.torchscript";
         torch::jit::script::Module yolo_model;
         yolo_model = torch::jit::load(model_path);
         yolo_model.eval();
         yolo_model.to(device, torch::kFloat32);
 
         // Load image and preprocess
-        cv::Mat image = cv::imread("../test/sunlamp/img000437.jpg");
+        cv::Mat image = cv::imread("../img000046.jpg");
+        //cv::Mat image = cv::imread("../img000121.jpg");
         cv::Mat input_image;
         letterbox(image, input_image, {416, 416});
 

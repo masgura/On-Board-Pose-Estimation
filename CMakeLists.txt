@@ -26,3 +26,7 @@ set_property(TARGET obj_det PROPERTY CXX_STANDARD 17)
 add_executable(main "${CMAKE_CURRENT_SOURCE_DIR}/main.cc")
 target_link_libraries(main ${TORCH_LIBRARIES} ${OpenCV_LIBS})
 set_property(TARGET main PROPERTY CXX_STANDARD 17)
+
+add_executable(EPnP "${CMAKE_CURRENT_SOURCE_DIR}/EPnP.cc")
+target_link_libraries(EPnP ${OpenCV_LIBS})
+set_property(TARGET EPnP PROPERTY CXX_STANDARD 17)

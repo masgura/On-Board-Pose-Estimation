@@ -244,12 +244,14 @@ int main(int argc, char* argv[]) {
             float conf = keep[i][4].item().toFloat();
             int cls = keep[i][5].item().toInt();
             std::cout << "Rect: [" << x1 << "," << y1 << "," << x2 << "," << y2 << "]  Conf: " << conf << "  Class: " << classes[cls] << std::endl;
-            cv::Mat roi = image(cv::Rect(x1, y1, x2 - x1, y2 - y1));
-            cv::rectangle(image, cv::Rect(x1, y1, x2 - x1, y2 - y1), cv::Scalar(0, 255, 0), 2);
+            cv::Mat roi = image(cv::Rect(x1, y1, x2 - x1, y2 - y1)).clone();
+            std::string saving_dir = "../detections/" + std::string(argv[1]).substr(std::string(argv[1]).size() - 13);
+            cv::imwrite(saving_dir, roi);
 
-            cv::namedWindow("ROI", 0);
-            //cv::resizeWindow("ROI", 1920, 1200);
-            cv::imshow("ROI", roi);
+            
+            // Uncomment to show the image
+            //cv::namedWindow("ROI", 0);
+            //cv::imshow("ROI", roi);
         }
 
         int key = cv::waitKey(10);

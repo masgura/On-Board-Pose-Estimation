@@ -4,13 +4,14 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 #include <csignal>
+#include <chrono>
+#include <thread>
 
 // Global flag to indicate if the program should exit
 bool shouldExit = false;
 
 // Signal handler to catch termination signals
 void signalHandler(int signum) {
-    std::cout << "Received signal " << signum << ". Exiting..." << std::endl;
     shouldExit = true;
 }
 
@@ -18,13 +19,13 @@ void signalHandler(int signum) {
 #define EVENT_SIZE  (sizeof(struct inotify_event))
 #define BUF_LEN     (1024 * (EVENT_SIZE + 16))
 
-void executeCPlusPlusProgram(const std::string& imagePath) {
-    std::string command = "./obj_det " + imagePath;
+void executeCPlusPlusProgram(const std::string& Path) {
+    std::string command = Path;
     system(command.c_str());
 }
 
 int main() {
-    int fd, wd;
+    int fd, wd1, wd2, wd3;
     char buffer[BUF_LEN];
 
     // Initialize inotify
@@ -35,8 +36,18 @@ int main() {
     }
 
     // Watch for file creation events in the specified directory
-    wd = inotify_add_watch(fd, "../images", IN_CREATE | IN_MOVED_TO);
-    if (wd < 0) {
+    wd1 = inotify_add_watch(fd, "../images", IN_CREATE | IN_MOVED_TO);
+    if (wd1 < 0) {
+        perror("inotify_add_watch");
+        return 1;
+    }
+    wd2 = inotify_add_watch(fd, "../detections", IN_CREATE | IN_MOVED_TO);
+    if (wd2 < 0) {
+        perror("inotify_add_watch");
+        return 1;
+    }
+    wd2 = inotify_add_watch(fd, "../landmarks", IN_CREATE | IN_MOVED_TO);
+    if (wd2 < 0) {
         perror("inotify_add_watch");
         return 1;
     }
@@ -54,12 +65,16 @@ int main() {
             if (event->len) {
                 if (event->mask & IN_CREATE | IN_MOVED_TO) {
                     if (!(event->mask & IN_ISDIR)) {
-                        std::cout << "File created: " << event->name << std::endl;
                         // Check if the created file is an image
                         if (strstr(event->name, ".jpg") || strstr(event->name, ".png")) {
-                            std::string imagePath = "../images/" + std::string(event->name);
-                            executeCPlusPlusProgram(imagePath);
+                            std::string Path = "./obj_det ../images/" + std::string(event->name);
+                            executeCPlusPlusProgram(Path);
                         }
+                        if (strstr(event->name, ".txt") || strstr(event->name, ".png")) {
+                            std::string Path = "./EPnP ../landmarks/" + std::string(event->name);
+                            executeCPlusPlusProgram(Path);
+                        }
+
                     }
                 }
             }
@@ -68,7 +83,9 @@ int main() {
     }
 
     // Clean up
-    inotify_rm_watch(fd, wd);
+    inotify_rm_watch(fd, wd1);
+    inotify_rm_watch(fd, wd2);
+    inotify_rm_watch(fd, wd2);
     close(fd);
 
     return 0;

@@ -32,6 +32,7 @@ To create and launch the executable:
 git clone https://github.com/masgura/On-Board-Pose-Estimation.git
 cd On-Board-Pose-Estimation
 mkdir build && cd build
+mkdir images && mkdir detections && mkdir landmarks
 cmake ..
 make
 ./main

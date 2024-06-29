@@ -6,9 +6,9 @@ This repository contains the code to perform on-board pose estimation.
 - OpenCV >= 4.0.0
 - C++ >= 17.0
 - Cmake >= 3.18
-- OpenVINO >= 2022.3.1
+- OpenVINO >= 2024
 
-To install OpenVINO you can refer to https://docs.openvino.ai/2022.3/openvino_docs_install_guides_installing_openvino_linux_header.html#doxid-openvino-docs-install-guides-installing-openvino-linux-header
+To install OpenVINO you can refer to https://docs.openvino.ai/2024/get-started/install-openvino.html
 
 To install OpenCV:
 
@@ -24,3 +24,10 @@ cmake --build .
 ```
 
 # Usage
+
+This repository is based on the [ESA Kelvins Pose Estimation Challenge](https://kelvins.esa.int/satellite-pose-estimation-challenge/home/). In particular, the coe in [inference.cpp](https://github.com/masgura/On-board-pose-estimation/blob/main/src/inference.cpp) is used to process an image with two neural network:
+
+1. YOLOv8 nano is used to detect the bounding box enclosing the Tango spacecraft.
+2. The image zoomed on the Region of Interest (RoI) is then passed through a YOLOv8-pose nano model to regress the position of 11 keypoints.
+
+Instead, [slab_score.cpp](https://github.com/masgura/On-board-pose-estimation/blob/main/src/slab_score.cpp) is used to estimate translation and orientation of the spacecraft through the EPnP algorithm, and to compute the SLAB score on the test set.

@@ -34,7 +34,7 @@ make
 
 # Usage
 
-This repository is based on the [ESA Kelvins Pose Estimation Challenge](https://kelvins.esa.int/satellite-pose-estimation-challenge/home/). In particular, the coe in [inference.cpp](https://github.com/masgura/On-board-pose-estimation/blob/main/src/inference.cpp) is used to process an image with two neural network:
+This repository is based on the [ESA Kelvins Pose Estimation Challenge](https://kelvins.esa.int/satellite-pose-estimation-challenge/home/) and needs the test set from the [SPEED dataset](https://purl.stanford.edu/dz692fn7184). In particular, the code in [inference.cpp](https://github.com/masgura/On-board-pose-estimation/blob/main/src/inference.cpp) is used to process every image in the test set with two neural network:
 
 1. YOLOv8 nano is used to detect the bounding box enclosing the Tango spacecraft.
 2. The image zoomed on the Region of Interest (RoI) is then passed through a YOLOv8-pose nano model to regress the position of 11 keypoints.

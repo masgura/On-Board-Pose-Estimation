@@ -1,6 +1,6 @@
 # On-Board Pose Estimation
 
-This repository contains the code to perform on-board pose estimation.
+This repository contains the code to perform pose estimation on the [SPEED dataset](https://purl.stanford.edu/dz692fn7184). Refer to the repository found in https://github.com/masgura/SPEED to see how to preprocess the dataset and train the detection and regression models.
 
 ## Dependencies
 - OpenCV >= 4.0.0

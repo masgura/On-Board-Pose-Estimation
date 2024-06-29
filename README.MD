@@ -5,7 +5,7 @@ This repository contains the code to perform pose estimation on the [SPEED datas
 ## Dependencies
 - OpenCV >= 4.0.0
 - C++ >= 17.0
-- Cmake >= 3.18
+- Cmake >= 3.10
 - OpenVINO >= 2024
 
 To install OpenVINO you can refer to https://docs.openvino.ai/2024/get-started/install-openvino.html

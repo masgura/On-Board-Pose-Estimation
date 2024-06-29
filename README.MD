@@ -59,3 +59,9 @@ The code foun in run_all.sh can be used to measure CPU usage, CPU temperature an
 sudo apt-get install cpufrequtils
 ```
 
+Then the .sh can be launched with:
+
+```
+chmod +x run_all.sh
+./run_all.sh
+```

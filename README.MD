@@ -22,6 +22,15 @@ cmake  ../opencv-4.x
 
 cmake --build .
 ```
+# Build
+
+To build the project:
+
+```
+mkdir build && cd build
+cmake ..
+make
+```
 
 # Usage
 

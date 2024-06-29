@@ -81,7 +81,7 @@ int main() {
 
     EPnP epnp;
 
-    std::ifstream inffile("../output/inf_results.json");
+    std::ifstream inffile("./output/inf_results.json");
     json infResults;
     try {
         inffile >> infResults;
@@ -90,7 +90,7 @@ int main() {
         return 1;
     }
 
-    std::ifstream testfile("../test/test.json");
+    std::ifstream testfile("./test/test.json");
     json testData;
     try {
         testfile >> testData;
@@ -99,14 +99,14 @@ int main() {
         return 1;
     }
 
-    std::string test_img_path = "../test/images/";
+    std::string test_img_path = "./test/images/";
     int num_images = std::distance(fs::directory_iterator(test_img_path), fs::directory_iterator{});
 
     // Evaluation of SLAB Score on min # landmarks and min kpts score
     std::vector<int> MIN_LANDMARK_VEC(6);
     std::iota(MIN_LANDMARK_VEC.begin(), MIN_LANDMARK_VEC.end(), 5);
     std::vector<float> MIN_CONF_VEC;
-    for(float i = 0.0; i <= 0.9; i += 0.05){
+    for(float i = 0.00; i <= 0.95; i += 0.05){
         MIN_CONF_VEC.push_back(i);
     }
     std::vector<std::vector<float>> eslab_mat;
@@ -213,13 +213,13 @@ int main() {
     param_optimization["MIN_LANDMARK"] = MIN_LANDMARK_VEC;
     param_optimization["MIN_CONFIDENCE"] = MIN_CONF_VEC;
     param_optimization["SLAB_score"] = eslab_mat;
-    std::ofstream outFile("../output/param_optimization.json");
+    std::ofstream outFile("./output/param_optimization.json");
     outFile << param_optimization.dump(4); 
     outFile.close();
 
-    std::cout << "UPDATING ../output/inf_results.json WITH EPNP RESULTS" << std::endl;
+    std::cout << "UPDATING ./output/inf_results.json WITH EPNP RESULTS" << std::endl;
     for (int i = 0; i < num_images; i++) {
-        infResults[i]["quat"] = -opt_quat[i];
+        infResults[i]["quat"] = opt_quat[i];
         infResults[i]["tvec"] = opt_tvec[i];
         infResults[i]["epnp_time"] = opt_time[i];
         infResults[i]["eq"] = opt_eq[i];
@@ -227,7 +227,7 @@ int main() {
         infResults[i]["Et"] = opt_Et[i];
     }
 
-    std::ofstream infResultsFile("../output/inf_results.json");
+    std::ofstream infResultsFile("./output/inf_results.json");
     infResultsFile << infResults.dump(4);
     infResultsFile.close();
 

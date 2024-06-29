@@ -7,8 +7,17 @@ void YOLOv8::LoadModel(const std::string &model_path) {
     INPUT:
         - model_path    |   path to the .xml model
     */
+    core.set_property(device, ov::hint::enable_cpu_pinning(false), ov::inference_num_threads(numThreads));
+    std::shared_ptr<ov::Model> read_model = core.read_model(model_path);
+    ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(read_model);
 
-    model = core.compile_model(model_path, device, ov::inference_num_threads(numThreads));
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC").set_color_format(ov::preprocess::ColorFormat::BGR);
+    ppp.input().preprocess().convert_element_type(ov::element::f32).convert_color(ov::preprocess::ColorFormat::RGB).scale({ 255, 255, 255 });
+    ppp.input().model().set_layout("NCHW");
+    ppp.output().tensor().set_element_type(ov::element::f32);
+
+    read_model = ppp.build();
+    model = core.compile_model(read_model);
 
     infer_request = model.create_infer_request();
     auto input_port = infer_request.get_input_tensor();
@@ -79,8 +88,8 @@ void YOLOv8::scale_coords(const std::vector<int> &img1_shape, std::vector<std::v
     */
    
     auto gain = (std::min)((float)img1_shape[0] / img0_shape[0], (float)img1_shape[1] / img0_shape[1]);
-    auto pad0 = std::round((float)(img1_shape[1] - img0_shape[1] * gain) / 2.);
-    auto pad1 = std::round((float)(img1_shape[0] - img0_shape[0] * gain) / 2.);
+    auto pad0 = std::round((float)(img1_shape[1] - img0_shape[1] * gain) / 2. - 0.1);
+    auto pad1 = std::round((float)(img1_shape[0] - img0_shape[0] * gain) / 2. - 0.1);
 
     for (int i = 0; i < 11; i++){
         kpts[i][0] -= pad0; kpts[i][0] /= gain; 
@@ -92,17 +101,16 @@ void YOLOv8::scale_coords(const std::vector<int> &img1_shape, std::vector<std::v
 
 void YOLOv8::nms(const cv::Mat &output_buffer, Prediction &outPred) {
 
-    std::vector<float> classScores;
-    std::vector<cv::Rect> boxes;
-    std::vector<std::vector<float>> objKeypoints;
-
+    cv::Rect bbox;
+    std::vector<float> objKeypoints;
+    float maxScore = 0.0f;
     for (int i = 0; i < output_buffer.rows; i++) {
 
         float classScore = output_buffer.at<float>(i, 4); 
         
-        if (classScore > confThreshold) {
+        if (classScore > maxScore) {
             
-            classScores.push_back(classScore);
+            maxScore = classScore;
 
             float cx = output_buffer.at<float>(i, 0);
             float cy = output_buffer.at<float>(i, 1);
@@ -116,55 +124,27 @@ void YOLOv8::nms(const cv::Mat &output_buffer, Prediction &outPred) {
             height = int(h);
 
             if (output_buffer.cols > 5) {
-                std::vector<float> keypoints;
+                std::vector<std::vector<float>> keypoints;
+                std::vector<float> confScores;
                 cv::Mat kpts = output_buffer.row(i).colRange(5, 38);
                 for (int i = 0; i < 11; i++) {                
                     float x = kpts.at<float>(0, i * 3 + 0);
                     float y = kpts.at<float>(0, i * 3 + 1);
                     float s = kpts.at<float>(0, i * 3 + 2);
-                    keypoints.push_back(x);
-                    keypoints.push_back(y);
-                    keypoints.push_back(s);
+                    keypoints.push_back({x, y});
+                    confScores.push_back(s);
                    
                 }
-                objKeypoints.push_back(keypoints);
+                outPred.keypoints = keypoints;
+                outPred.kptsScores = confScores;
             } 
-            cv::Rect bbox =  cv::Rect(left, top, width, height);
+            bbox =  cv::Rect(left, top, width, height);
             
-            boxes.push_back(bbox);
         }
     }
 
-    // Perform Non-Max Suppression
-    std::vector<int> indices;
-    cv::dnn::NMSBoxes(boxes, classScores, confThreshold, nmsThreshold, indices, 1.0f, 1);
-
-    cv::Rect bbox = boxes[indices[0]];
-    
     outPred.bbox = {bbox.x, bbox.y, bbox.width, bbox.height};
-    outPred.classScore = classScores[indices[0]];
-
-    if (output_buffer.cols > 5) {
-
-        std::vector<std::vector<float>> keypoints;
-        std::vector<float> confScores;
-        
-        int index = indices[0];
-        for (int i = 0; i < 11; i++) {
-
-            float x = objKeypoints[index][i*3+0];
-            float y = objKeypoints[index][i*3+1];
-            float s = objKeypoints[index][i*3+2];
-            keypoints.push_back({x, y});
-            confScores.push_back(s);
-            
-        }
-
-        outPred.keypoints = keypoints;
-        outPred.kptsScores = confScores;
-
-    }
-
+    outPred.classScore = maxScore;
 }
 
 void YOLOv8::run(cv::Mat &image, Prediction &outPred) {
@@ -177,8 +157,9 @@ void YOLOv8::run(cv::Mat &image, Prediction &outPred) {
     cv::Mat in_image;
     letterbox(image, in_image, int(in_shape[2]));
 
-    auto blob = cv::dnn::blobFromImage(in_image, 1.0 / 255.0, cv::Size(in_shape[2], in_shape[2]), cv::Scalar(), true, false);
-    ov::Tensor input_tensor(in_type, in_shape, blob.ptr(0));
+    //auto blob = cv::dnn::blobFromImage(in_image, 1.0 / 255.0, cv::Size(in_shape[2], in_shape[2]), cv::Scalar(), true, false);
+    float *input_data = (float *)in_image.data;
+    ov::Tensor input_tensor(in_type, in_shape, input_data);
     infer_request.set_input_tensor(input_tensor);
 
     // Start inference

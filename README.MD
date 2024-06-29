@@ -40,3 +40,22 @@ This repository is based on the [ESA Kelvins Pose Estimation Challenge](https://
 2. The image zoomed on the Region of Interest (RoI) is then passed through a YOLOv8-pose nano model to regress the position of 11 keypoints.
 
 Instead, [slab_score.cpp](https://github.com/masgura/On-board-pose-estimation/blob/main/src/slab_score.cpp) is used to estimate translation and orientation of the spacecraft through the EPnP algorithm, and to compute the SLAB score on the test set.
+
+To perform inference on the test set:
+
+```
+./inference <path/to/detection/model.xml> <path/to/regression/model.xml> <path/to/inference/file/save/file.json> <number of threads>
+```
+
+To compute the SLAB score:
+
+```
+./slab_score 
+```
+
+The code foun in run_all.sh can be used to measure CPU usage, CPU temperature and inference time at different number of threads and CPU frequency. The Linux `cpufrequtils` package is required:
+
+```
+sudo apt-get install cpufrequtils
+```
+
